@@ -30,7 +30,9 @@ RUN chmod +x /entrypoint.sh
 VOLUME ["/data"]
 EXPOSE 18900
 
-HEALTHCHECK --interval=60s --timeout=15s --start-period=120s --retries=3 \
-    CMD curl -fsS --max-time 10 "http://127.0.0.1:${OFM_PORT}/health" >/dev/null || exit 1
+# Upstream tidak punya /health. Probe /v1/models — 200 = hidup + key valid,
+# 401 = hidup tapi key salah, koneksi gagal = mati. -f bikin exit code benar.
+HEALTHCHECK --interval=60s --timeout=20s --start-period=120s --retries=3 \
+    CMD curl -fsS --max-time 15 "http://127.0.0.1:${OFM_PORT}/v1/models" >/dev/null || exit 1
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/entrypoint.sh"]
