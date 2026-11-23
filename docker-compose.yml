@@ -1,0 +1,35 @@
+services:
+  ofm:
+    build:
+      context: .
+      args:
+        # Ganti ke commit SHA kalau mau versi terkunci.
+        OFM_REF: main
+    image: ofm-standalone:latest
+    container_name: ofm
+    restart: unless-stopped
+    ports:
+      # Bind loopback saja — akses dari luar lewat SSH tunnel.
+      - "127.0.0.1:18900:18900"
+    volumes:
+      - ofm-data:/data
+    environment:
+      OFM_PORT: "18900"
+      OFM_HOME: "/data"
+      # Image harus immutable; update lewat rebuild, bukan self-update.
+      OFM_DISABLE_SELF_UPDATE: "1"
+      TZ: "Asia/Jakarta"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "--max-time", "10", "http://127.0.0.1:18900/health"]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 120s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  ofm-data:

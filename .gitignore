@@ -1,0 +1,11 @@
+# Jangan commit data runtime
+data/
+*.log
+
+# Node
+node_modules/
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
